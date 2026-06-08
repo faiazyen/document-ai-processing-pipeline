@@ -1,0 +1,10 @@
+# Optional dependencies for the experimental LangChain extraction module
+# app/experimental/langchain_extractor.py
+#
+# Install with:
+#   pip install -r requirements-experimental.txt
+#
+# These are NOT required for the main FastAPI application to run.
+langchain>=0.3.0
+langchain-openai>=0.2.0
+langchain-core>=0.3.0
