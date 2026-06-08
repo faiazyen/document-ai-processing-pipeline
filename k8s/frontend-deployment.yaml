@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: document-ai-frontend
+  labels:
+    app: document-ai-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: document-ai-frontend
+  template:
+    metadata:
+      labels:
+        app: document-ai-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: document-ai-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: document-ai-secrets
+                  key: openai-api-key
+            - name: PYTHON_API_URL
+              value: "http://document-ai-backend:80"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: document-ai-frontend
+  labels:
+    app: document-ai-frontend
+spec:
+  selector:
+    app: document-ai-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer

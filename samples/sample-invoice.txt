@@ -1,0 +1,36 @@
+INVOICE
+
+From: Acme Textiles GmbH
+       Berliner Strasse 42, 10115 Berlin, Germany
+       VAT: DE123456789
+
+Bill To: Merch Maverick Ltd
+         123 Commerce Street, London, EC1A 1BB, United Kingdom
+
+Invoice Number: INV-2024-042
+Invoice Date: 2024-03-15
+Due Date: 2024-04-15
+Payment Terms: Net 30
+
+------------------------------------------------------
+Description                    Qty    Unit Price  Total
+------------------------------------------------------
+Custom Polo Shirts (100% Cot   100     12.00    1200.00
+Embroidered Logo (chest)       100      2.50     250.00
+Hang Tags (branded)            100      0.30      30.00
+------------------------------------------------------
+
+Subtotal: EUR 1480.00
+VAT (20%): EUR 296.00
+Grand Total: EUR 1776.00
+
+Currency: EUR
+
+Payment Instructions:
+Bank: Deutsche Bank
+IBAN: DE89 3704 0044 0532 0130 00
+BIC: COBADEFFXXX
+Reference: INV-2024-042
+
+Thank you for your business.
+Acme Textiles GmbH
