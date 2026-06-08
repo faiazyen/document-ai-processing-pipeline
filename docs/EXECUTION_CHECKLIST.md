@@ -42,7 +42,7 @@
 
 - [x] Add audit document with completed and pending checks.
 
-## Phase 8: Interview Assets
+## Phase 8: Documentation Cleanup
 
-- [x] Add interview walkthrough.
-- [x] Add pitch deck outline.
+- [x] Add architecture notes.
+- [x] Add testing and debugging audit.

@@ -26,7 +26,7 @@ describe("validateInvoice", () => {
     const warnings = validateInvoice({
       ...emptyInvoiceExtraction,
       document_type: "invoice",
-      supplier_name: "The Merch Maverick",
+      supplier_name: "Northstar Print Studio",
       buyer_name: "Acme Retail Group",
       invoice_number: "INV-100",
       invoice_date: "2026-06-08",
@@ -52,7 +52,7 @@ describe("validateInvoice", () => {
     const warnings = validateInvoice({
       ...emptyInvoiceExtraction,
       document_type: "invoice",
-      supplier_name: "The Merch Maverick",
+      supplier_name: "Northstar Print Studio",
       buyer_name: "Acme Retail Group",
       invoice_number: "INV-101",
       invoice_date: "2026-06-08",

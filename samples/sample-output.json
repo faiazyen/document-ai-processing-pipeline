@@ -5,9 +5,9 @@
   "confidence_score": 0.91,
   "extraction": {
     "document_type": "invoice",
-    "supplier_name": "The Merch Maverick",
+    "supplier_name": "Northstar Print Studio",
     "supplier_country": "United States",
-    "buyer_name": "Acme Retail Group",
+    "buyer_name": "Atlas Retail Group",
     "invoice_number": "MM-2026-0042",
     "invoice_date": "2026-06-08",
     "due_date": "2026-06-30",
@@ -28,6 +28,6 @@
     "uncertainty_notes": []
   },
   "validation_warnings": [],
-  "raw_text_preview": "The Merch Maverick Invoice Number: MM-2026-0042...",
+  "raw_text_preview": "Northstar Print Studio Invoice Number: INV-2026-0042...",
   "processing_ms": 1840
 }

@@ -5,7 +5,7 @@ SAMPLE_INVOICE_TEXT = """\
 INVOICE
 
 From: Acme Textiles GmbH
-Bill To: Merch Maverick Ltd
+Bill To: Atlas Retail Group
 
 Invoice Number: INV-2024-042
 Invoice Date: 2024-03-15

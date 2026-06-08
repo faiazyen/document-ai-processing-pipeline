@@ -7,7 +7,7 @@ export default function Home() {
         <header className="flex flex-col gap-6 border-b border-line/70 pb-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <p className="font-mono text-xs uppercase tracking-[0.24em] text-accent">
-              MaverickIQ / The Merch Maverick
+              Personal Document AI Lab
             </p>
             <h1 className="mt-4 text-4xl font-semibold leading-tight text-foreground sm:text-5xl">
               Document AI Processing Pipeline

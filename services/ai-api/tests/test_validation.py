@@ -7,7 +7,7 @@ def _base_invoice(**kwargs) -> InvoiceExtraction:
     defaults = dict(
         document_type="invoice",
         supplier_name="Acme Textiles",
-        buyer_name="Merch Maverick Ltd",
+        buyer_name="Atlas Retail Group",
         invoice_number="INV-2024-001",
         invoice_date="2024-01-15",
         total_amount=1200.00,

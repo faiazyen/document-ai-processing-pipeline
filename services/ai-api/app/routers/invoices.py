@@ -81,7 +81,7 @@ async def process_invoice(file: UploadFile = File(..., description="PDF invoice 
                 message=(
                     "This PDF appears to be image-only with no extractable text. "
                     "Production deployments should route through an OCR service "
-                    "(AWS Textract / Azure Document Intelligence / Google Document AI)."
+                    "before structured extraction."
                 ),
             )
         )

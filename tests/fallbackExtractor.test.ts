@@ -3,7 +3,7 @@ import { fallbackExtractInvoice, mergeWithFallback } from "../src/lib/fallbackEx
 import { emptyInvoiceExtraction } from "../src/lib/schemas";
 
 const invoiceText = `
-The Merch Maverick
+Northstar Print Studio
 Invoice Number: MM-2026-0042
 Invoice Date: 2026-06-08
 Due Date: 2026-06-30
@@ -37,7 +37,7 @@ describe("fallbackExtractInvoice", () => {
       {
         ...emptyInvoiceExtraction,
         document_type: "invoice",
-        supplier_name: "MaverickIQ",
+        supplier_name: "Northstar Print Studio",
         invoice_number: "AI-001",
         confidence_score: 0.82,
         uncertainty_notes: [],
@@ -45,7 +45,7 @@ describe("fallbackExtractInvoice", () => {
       fallback,
     );
 
-    expect(merged.supplier_name).toBe("MaverickIQ");
+    expect(merged.supplier_name).toBe("Northstar Print Studio");
     expect(merged.invoice_number).toBe("AI-001");
     expect(merged.total_amount).toBe(3528);
     expect(merged.confidence_score).toBe(0.82);

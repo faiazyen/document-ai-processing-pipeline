@@ -1,6 +1,6 @@
 # Document AI Processing Pipeline — Python FastAPI Backend
 
-This service is the Python backend for the Document AI Processing Pipeline by MaverickIQ. It exposes a REST API for PDF invoice processing: text extraction, OpenAI structured extraction, rule-based fallback, deterministic validation, SQLite persistence, and in-memory metrics.
+This service is the Python backend for the Document AI Processing Pipeline. It exposes a REST API for PDF invoice processing: text extraction, OpenAI structured extraction, rule-based fallback, deterministic validation, SQLite persistence, and in-memory metrics.
 
 ## Stack
 
@@ -80,8 +80,8 @@ tests/
 
 ## Production Notes
 
-SQLite is used for the portfolio demo. Replace with PostgreSQL/Supabase by changing `DATABASE_URL`; `psycopg` is included for PostgreSQL deployments.
+SQLite is used for local experimentation. Replace it with PostgreSQL by changing `DATABASE_URL`; `psycopg` is included for PostgreSQL deployments.
 
 If `OPENAI_API_KEY` is missing or OpenAI fails, the API degrades gracefully to rule-based fallback extraction instead of crashing.
 
-Scanned PDFs (no extractable text) return a `scanned_pdf_requires_ocr` validation warning. Production would route these to AWS Textract, Azure Document Intelligence, or Google Document AI.
+Scanned PDFs with no extractable text return a `scanned_pdf_requires_ocr` validation warning. A production workflow would route these files to a managed OCR service.

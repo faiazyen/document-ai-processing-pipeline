@@ -1,12 +1,10 @@
 # Document AI Processing Pipeline
 
-**by MaverickIQ**
-
 [![CI](https://github.com/faiazyen/document-ai-processing-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/faiazyen/document-ai-processing-pipeline/actions/workflows/ci.yml)
 
-A production-style B2B invoice AI processing system. Uploads PDF invoices, extracts text, runs OpenAI structured extraction, fills gaps with deterministic fallback rules, validates all fields, persists results, and exposes a typed REST API — all backed by a Python FastAPI service and a Next.js dashboard.
+A personal document-processing experiment for extracting structured invoice data from PDF files. The project combines a Next.js dashboard, a Python FastAPI service, deterministic validation, fallback extraction, persistence, tests, Docker, and deployment-ready configuration.
 
-Built for portfolio conversations around **AI Platform Engineer** and **GenAI Developer** roles — particularly [Rossum](https://rossum.ai)-style document intelligence systems.
+The goal is simple: take an invoice PDF, extract useful text, ask an LLM for structured fields, verify the result with deterministic rules, and show the final JSON in a way that is easy to inspect.
 
 ---
 
@@ -14,138 +12,93 @@ Built for portfolio conversations around **AI Platform Engineer** and **GenAI De
 
 ```mermaid
 graph TD
-    A[PDF Upload via Browser] --> B[Next.js API Route]
-    B --> C[pdf-parse Text Extraction]
-    C --> D{Scanned PDF?}
-    D -- Yes --> E[scanned_pdf_requires_ocr warning]
-    D -- No --> F[OpenAI Structured Extraction]
-    F --> G{Confidence < 0.74 or Missing Critical Fields?}
-    G -- Yes --> H[Merge with Rule-Based Fallback]
-    G -- No --> I[Use OpenAI Result]
-    H --> J[Deterministic Validation Engine]
-    I --> J
-    J --> K[SQLite Audit Log]
-    K --> L[JSON Response to Dashboard]
-
-    M[PDF Upload via curl/Swagger] --> N[Python FastAPI Backend]
-    N --> O[pypdf Text Extraction]
-    O --> D
+    A[PDF Upload] --> B[Text Extraction]
+    B --> C{Readable Text?}
+    C -- No --> D[OCR Warning]
+    C -- Yes --> E[Structured LLM Extraction]
+    E --> F{Low Confidence or Missing Fields?}
+    F -- Yes --> G[Rule-Based Fallback Merge]
+    F -- No --> H[Use Structured Result]
+    G --> I[Deterministic Validation]
+    H --> I
+    I --> J[Persist Result]
+    J --> K[JSON Response + Dashboard]
 ```
 
-```
-Frontend (Next.js + TypeScript)          Backend (Python FastAPI)
-┌─────────────────────────┐              ┌──────────────────────────────┐
-│ Upload Panel            │              │ POST /process-invoice        │
-│ Pipeline Steps          │  HTTP/REST   │ GET  /invoices               │
-│ Extraction Result       │ ──────────▶  │ GET  /invoices/{id}          │
-│ Validation Panel        │              │ GET  /health                 │
-│ JSON Viewer             │              │ GET  /metrics                │
-└─────────────────────────┘              │ Swagger UI at /docs          │
-                                         └──────────────────────────────┘
-                                                    │
-                                         ┌──────────┴──────────┐
-                                         │ SQLite (dev)         │
-                                         │ PostgreSQL (prod)    │
-                                         └──────────────────────┘
-```
+The repository includes two ways to run the pipeline:
+
+- **Next.js app**: interactive dashboard and API route for PDF uploads.
+- **FastAPI service**: standalone REST API with Swagger/OpenAPI, persistence, health checks, and metrics.
 
 ---
 
 ## Stack
 
 ### Frontend
-- Next.js 16 App Router — React 19, TypeScript, Tailwind CSS v4
-- `pdf-parse` — server-side PDF text extraction
-- `openai` SDK — structured extraction with Zod response parsing
-- Vitest — unit tests
 
-### Backend (Python)
-- FastAPI — REST API + Swagger/OpenAPI auto-docs
-- `pypdf` — PDF text extraction
-- `openai` Python SDK — LLM structured extraction
-- SQLAlchemy + SQLite — persistence and audit log
-- PostgreSQL-compatible SQLAlchemy configuration for production
-- Pydantic v2 — request/response schemas
-- pytest + anyio — async test suite
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- `pdf-parse`
+- OpenAI TypeScript SDK
+- Vitest
+
+### Backend
+
+- Python 3.11
+- FastAPI
+- Pydantic v2
+- SQLAlchemy
+- SQLite for local persistence
+- PostgreSQL-compatible database configuration
+- `pypdf`
+- OpenAI Python SDK
+- pytest
 
 ### Infrastructure
-- Docker + Docker Compose — containerized local dev
-- GitHub Actions — CI for both frontend and backend
-- Vercel — frontend production deployment
-- Kubernetes manifests — production deployment reference
+
+- Docker
+- Docker Compose
+- GitHub Actions CI
+- Vercel-ready frontend deployment
+- Kubernetes reference manifests
 
 ---
 
-## Live Demo
+## What It Does
 
-Deploy to Vercel: [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/faiazyen/document-ai-processing-pipeline)
-
----
-
-## Pipeline Steps
-
-```
-PDF upload
-  → text extraction (pdf-parse / pypdf)
-  → scanned PDF detection
-  → OpenAI structured extraction (gpt-4.1-mini)
-  → rule-based fallback when confidence < 0.74 or critical fields missing
-  → deterministic validation (10+ rules)
-  → SQLite persistence / audit log
-  → confidence score, warnings, extraction source, JSON output
-```
+- Uploads PDF invoices.
+- Extracts readable PDF text.
+- Detects image-only PDFs that need OCR.
+- Produces structured invoice fields.
+- Uses fallback rules when structured extraction is incomplete.
+- Validates missing fields, currency, totals, tax arithmetic, line items, and confidence.
+- Persists processed invoices through the FastAPI service.
+- Exposes `/health`, `/metrics`, `/docs`, and `/openapi.json`.
+- Renders confidence, warnings, and final JSON in the UI.
 
 ---
 
-## Python FastAPI Backend + Swagger API
-
-The Python backend (`services/ai-api/`) exposes the full invoice pipeline as a standalone REST service, making the project independently usable as a microservice.
-
-```bash
-cd services/ai-api
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
-```
-
-**Swagger UI:** http://localhost:8000/docs
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/process-invoice` | POST | Upload PDF → extract → validate → persist |
-| `/invoices` | GET | List all processed invoice summaries |
-| `/invoices/{id}` | GET | Get full extraction result by ID |
-| `/health` | GET | Service status + OpenAI config check |
-| `/metrics` | GET | In-memory processing counters |
-
-The backend demonstrates:
-- **Python** — all backend code in Python 3.9+
-- **FastAPI** — async REST API with auto-generated OpenAPI 3.1 spec
-- **REST APIs** — typed endpoints with proper HTTP status codes
-- **Swagger/OpenAPI** — interactive documentation at `/docs`
-- **Document processing** — PDF ingestion, text extraction, scanned detection
-- **GenAI extraction** — OpenAI SDK with structured JSON output
-- **Validation** — 10+ deterministic rules, warning codes with severity levels
-- **Persistence** — SQLAlchemy ORM, full audit log, ID-addressable records
-- **Monitoring** — `/health` and `/metrics` endpoints for ops visibility
-
-See [docs/API_OPENAPI.md](docs/API_OPENAPI.md) for the full API reference.
-
----
-
-## Local Setup (Frontend)
+## Local Frontend Setup
 
 ```bash
 npm install
 cp .env.example .env.local
-# Add OPENAI_API_KEY to .env.local
 npm run dev
 ```
 
-App runs at http://localhost:3000
+Frontend runs at:
+
+```text
+http://localhost:3000
+```
+
+Add `OPENAI_API_KEY` to `.env.local` only if you want live LLM extraction. Without it, the pipeline still runs with deterministic fallback extraction.
 
 ---
 
-## Local Setup (Python Backend)
+## Local FastAPI Setup
 
 ```bash
 cd services/ai-api
@@ -153,29 +106,43 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-# Add OPENAI_API_KEY to .env
 uvicorn app.main:app --reload --port 8000
 ```
 
+Swagger UI:
+
+```text
+http://localhost:8000/docs
+```
+
+Core endpoints:
+
+| Method | Path | Description |
+| --- | --- | --- |
+| POST | `/process-invoice` | Upload and process a PDF invoice |
+| GET | `/invoices` | List processed invoice summaries |
+| GET | `/invoices/{id}` | Read one processed invoice |
+| GET | `/health` | Service status |
+| GET | `/metrics` | In-memory processing counters |
+
 ---
 
-## Docker Compose (Both Services)
+## Docker Compose
 
 ```bash
 OPENAI_API_KEY=your-key docker compose up --build
 ```
 
+Services:
+
 - Frontend: http://localhost:3000
-- Backend + Swagger: http://localhost:8000/docs
+- FastAPI + Swagger: http://localhost:8000/docs
 
-**Troubleshooting:**
+Stop everything:
 
-| Issue | Fix |
-|-------|-----|
-| `OPENAI_API_KEY` missing | App still runs with fallback extraction — no crash |
-| Port already in use | Change ports in `docker-compose.yml` |
-| PDF parsing failure | Ensure the file is a valid, non-password-protected PDF |
-| Vercel build fails | Vercel deploys frontend only. Run backend separately. |
+```bash
+docker compose down
+```
 
 ---
 
@@ -183,119 +150,83 @@ OPENAI_API_KEY=your-key docker compose up --build
 
 ```bash
 # Frontend
-npm run dev          # local dev server
-npm run lint         # ESLint
-npm test             # Vitest unit tests
-npm run build        # production build
+npm run dev
+npm run lint
+npm test
+npm run build
 
-# Python backend
+# Backend
 cd services/ai-api
 python -m pytest tests/ -v
 
 # Docker
-docker compose up --build
+docker compose build
+docker compose up -d
 docker compose down
 ```
 
 ---
 
-## Testing Summary
+## Test Coverage
 
-| Suite | Tests | Status |
-|-------|-------|--------|
-| TypeScript / Vitest | 5 | Passing |
-| Python / pytest | 27 | Passing |
-| **Total** | **32** | **All passing** |
+| Suite | Tests |
+| --- | ---: |
+| TypeScript / Vitest | 5 |
+| Python / pytest | 27 |
+| Total | 32 |
 
-Python tests cover: validation rules, fallback extraction, SQLite persistence, health and metrics endpoints, OpenAPI exposure, and consistent API error responses.
-
----
-
-## Experimental LangChain Module
-
-`services/ai-api/app/experimental/langchain_extractor.py` provides an alternative extraction path using LangChain's `ChatOpenAI` and `JsonOutputParser`.
-
-```bash
-pip install langchain langchain-openai
-```
-
-**Why this exists:** GenAI Developer roles often mention LangChain. This module demonstrates working knowledge while documenting the honest tradeoff: direct OpenAI SDK calls are simpler, faster, and easier to debug for this focused extraction task. LangChain earns its complexity when you need multi-step chains, tool use, memory, or RAG.
+Tests cover fallback extraction, validation rules, persistence, health/metrics endpoints, OpenAPI exposure, and API error response shape.
 
 ---
 
-## Documentation
-
-| Document | Description |
-|----------|-------------|
-| [Architecture](docs/ARCHITECTURE.md) | System design and reliability strategy |
-| [API Contract](docs/API_CONTRACT.md) | Next.js API route specification |
-| [API OpenAPI](docs/API_OPENAPI.md) | Python FastAPI / Swagger reference |
-| [Invoice Schema](docs/INVOICE_SCHEMA.md) | Field definitions and extraction logic |
-| [Schema and Validation](docs/INVOICE_SCHEMA_AND_VALIDATION.md) | Validation rules explained |
-| [Testing and Debugging Audit](docs/TESTING_AND_DEBUGGING_AUDIT.md) | Full QA report with test matrix |
-| [Interview Walkthrough](docs/INTERVIEW_WALKTHROUGH.md) | End-to-end architecture explanation |
-| [Execution Checklist](docs/EXECUTION_CHECKLIST.md) | Build and deploy steps |
-
----
-
-## Kubernetes Reference
-
-Deployment manifests in `k8s/` demonstrate production-style container orchestration.
-
-```bash
-kubectl apply -f k8s/backend-deployment.yaml
-kubectl apply -f k8s/backend-service.yaml
-```
-
-See [k8s/README.md](k8s/README.md) for local minikube instructions.
-
----
-
-## Invoice Output Schema
+## Example Output
 
 ```json
 {
   "document_type": "invoice",
-  "supplier_name": "Acme Textiles GmbH",
-  "supplier_country": "DE",
-  "buyer_name": "Merch Maverick Ltd",
-  "invoice_number": "INV-2024-042",
-  "invoice_date": "2024-03-15",
-  "due_date": "2024-04-15",
-  "currency": "EUR",
-  "subtotal": 1480.00,
-  "vat_amount": 296.00,
-  "total_amount": 1776.00,
+  "supplier_name": "Northstar Print Studio",
+  "buyer_name": "Atlas Retail Group",
+  "invoice_number": "INV-2026-042",
+  "invoice_date": "2026-06-08",
+  "due_date": "2026-06-30",
+  "currency": "USD",
+  "subtotal": 2940,
+  "vat_amount": 588,
+  "total_amount": 3528,
   "line_items": [
-    { "description": "Custom Polo Shirts", "quantity": 100, "unit_price": 12.00, "total": 1200.00 }
+    {
+      "description": "Custom Embroidered Hoodies",
+      "quantity": 120,
+      "unit_price": 24.5,
+      "total": 2940
+    }
   ],
   "payment_terms": "Net 30",
   "confidence_score": 0.91,
   "validation_warnings": [],
-  "extraction_source": "openai",
-  "processing_ms": 1342.5
+  "extraction_source": "openai"
 }
 ```
 
 ---
 
-## Production Readiness Notes
+## Design Notes
 
-This is intentionally scoped as a portfolio demo, but the architecture leaves clean seams for production hardening:
+This project intentionally keeps AI output behind a validation boundary. The model can help extract structure, but deterministic code decides whether the result is complete, internally consistent, and safe to present.
 
-- **OCR** — scanned PDFs are detected and flagged; production routes to AWS Textract / Azure Document Intelligence / Google Document AI
-- **Object storage** — uploaded PDFs would go to S3 or GCS with signed URL retrieval
-- **Async queue** — large PDF batches need a job queue (Celery/SQS) to avoid request timeouts
-- **PostgreSQL** — swap `DATABASE_URL` to replace SQLite with no schema changes
-- **Auth layer** — API key or OAuth2 via FastAPI's security utilities
-- **Rate limiting** — per-client throttle with `slowapi` or API gateway
-- **Observability** — OpenTelemetry traces, Prometheus metrics, Grafana dashboards
-- **Structured logs** — JSON logs with correlation IDs for Datadog/Splunk
-- **Model tracking** — log model name and version per extraction for drift analysis
-- **Human review queue** — invoices with high-severity warnings route to manual review
+Known limitations:
 
----
+- OCR is not implemented yet.
+- The fallback extractor is intentionally conservative.
+- Metrics are in-memory and reset on restart.
+- Authentication and rate limiting are not included.
+- Large batch processing would need a queue-based worker design.
 
-## GitHub Topics
+Future improvements:
 
-`document-ai` `genai` `openai` `fastapi` `nextjs` `typescript` `python` `invoice-processing` `mlops` `ai-platform` `llm` `docker` `ci-cd` `rag`
+- OCR for scanned documents.
+- Field-level confidence.
+- Labeled fixture set for extraction-quality regression tests.
+- Object storage for uploaded PDFs.
+- Authenticated API access.
+- Prometheus/OpenTelemetry instrumentation.

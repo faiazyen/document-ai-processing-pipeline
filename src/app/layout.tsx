@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Document AI Processing Pipeline by MaverickIQ",
+  title: "Document AI Processing Pipeline",
   description:
-    "Portfolio-grade invoice extraction, validation, and fallback processing for B2B merchandise documents.",
+    "Invoice extraction, validation, and fallback processing for PDF documents.",
 };
 
 export default function RootLayout({

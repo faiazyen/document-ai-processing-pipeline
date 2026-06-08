@@ -40,7 +40,7 @@ Upload a PDF invoice for end-to-end AI extraction and validation.
     "document_type": "invoice",
     "supplier_name": "Acme Textiles GmbH",
     "supplier_country": "DE",
-    "buyer_name": "Merch Maverick Ltd",
+    "buyer_name": "Atlas Retail Group",
     "invoice_number": "INV-2024-042",
     "invoice_date": "2024-03-15",
     "due_date": "2024-04-15",
@@ -102,7 +102,7 @@ Return a list of all processed invoice summaries from the database, ordered newe
     "filename": "acme-invoice-042.pdf",
     "document_type": "invoice",
     "supplier_name": "Acme Textiles GmbH",
-    "buyer_name": "Merch Maverick Ltd",
+    "buyer_name": "Atlas Retail Group",
     "invoice_number": "INV-2024-042",
     "total_amount": 1440.00,
     "currency": "EUR",
@@ -212,6 +212,6 @@ curl http://localhost:8000/metrics
 
 4. **Interactive testing** — Swagger UI lets stakeholders and QA engineers test endpoints without writing code, reducing feedback loop time.
 
-5. **Integration with API gateways** — AWS API Gateway, Kong, and Azure APIM all consume OpenAPI specs natively for routing, auth, and rate limiting.
+5. **Integration with API gateways** — OpenAPI specs can drive gateway routing, auth, documentation, and rate limiting.
 
 6. **Observability hooks** — Tools like Stoplight, Postman, and Apidog can monitor spec drift and alert when actual responses deviate from the documented contract.

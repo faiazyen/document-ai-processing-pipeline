@@ -1,5 +1,5 @@
 export const invoiceExtractionPrompt = `
-You extract B2B merchandise invoice data for The Merch Maverick.
+You extract structured invoice data from B2B PDF text.
 
 Return only fields that are supported by the document text. Do not invent values.
 Normalize money values to numbers without currency symbols. Normalize currency to ISO 4217 when possible.

@@ -4,7 +4,7 @@ From: Acme Textiles GmbH
        Berliner Strasse 42, 10115 Berlin, Germany
        VAT: DE123456789
 
-Bill To: Merch Maverick Ltd
+Bill To: Atlas Retail Group
          123 Commerce Street, London, EC1A 1BB, United Kingdom
 
 Invoice Number: INV-2024-042

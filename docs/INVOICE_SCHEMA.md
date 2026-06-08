@@ -5,9 +5,9 @@ The canonical extraction shape lives in `src/lib/schemas.ts`.
 ```json
 {
   "document_type": "invoice",
-  "supplier_name": "The Merch Maverick",
+  "supplier_name": "Northstar Print Studio",
   "supplier_country": "United States",
-  "buyer_name": "Acme Retail Group",
+  "buyer_name": "Atlas Retail Group",
   "invoice_number": "MM-2026-0042",
   "invoice_date": "2026-06-08",
   "due_date": "2026-06-30",

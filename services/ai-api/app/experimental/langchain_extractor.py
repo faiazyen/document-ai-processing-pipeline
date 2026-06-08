@@ -5,7 +5,7 @@ This module provides an alternative to the direct OpenAI SDK extraction in
 app/services/openai_extract.py. It uses LangChain's structured output parsing.
 
 WHY THIS EXISTS:
-- Demonstrates awareness of the LangChain ecosystem (common GenAI Developer interview topic).
+- Demonstrates an optional LangChain-based extraction path.
 - Shows when an orchestration layer adds value vs. when direct SDK is simpler.
 
 WHEN LANGCHAIN IS BETTER THAN DIRECT SDK:

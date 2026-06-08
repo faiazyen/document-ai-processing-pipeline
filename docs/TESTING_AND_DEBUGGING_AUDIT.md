@@ -1,6 +1,6 @@
 # Testing and Debugging Audit
 
-**Project:** Document AI Processing Pipeline by MaverickIQ
+**Project:** Document AI Processing Pipeline
 **Audit Date:** 2026-06-08
 **Author:** Faiaz Mazumder
 **Test Suites:** Vitest (TypeScript) + pytest (Python)
@@ -79,7 +79,7 @@
 | **Expected result** | `scanned_pdf_requires_ocr` warning; all fields null. |
 | **Actual result** | `is_scanned_pdf()` returns `True` when extracted text < 40 characters; warning is appended in router. |
 | **Status** | PASS |
-| **Notes** | Production path: route to AWS Textract, Azure Document Intelligence, or Google Document AI. Tesseract OCR available as `pytesseract` for offline fallback. |
+| **Notes** | Production path: route scanned files to a managed OCR service. Tesseract OCR is available as `pytesseract` for offline fallback. |
 
 ---
 
@@ -293,11 +293,11 @@
 
 | # | Limitation | Workaround | Production Path |
 |---|-----------|------------|-----------------|
-| 1 | SQLite is single-writer — not suitable for high-concurrency production load | Acceptable for portfolio demo | Replace `DATABASE_URL` with PostgreSQL/Supabase |
+| 1 | SQLite is single-writer — not suitable for high-concurrency production load | Acceptable for local experimentation | Replace `DATABASE_URL` with PostgreSQL |
 | 2 | Metrics reset on service restart | Documented in `/metrics` endpoint | Prometheus with persistent time-series storage |
 | 3 | No auth on any endpoint | Open demo acceptable | OAuth2 or API key via FastAPI security utilities |
-| 4 | Scanned PDFs get a warning but no OCR | Clearly documented | AWS Textract / Azure Document Intelligence / Google Document AI |
-| 5 | Large PDFs processed synchronously — may timeout under load | 20 MB upload limit + 60s Next.js route timeout | Async queue (Celery + Redis or AWS SQS) |
+| 4 | Scanned PDFs get a warning but no OCR | Clearly documented | Managed OCR service |
+| 5 | Large PDFs processed synchronously — may timeout under load | 20 MB upload limit + 60s Next.js route timeout | Async queue with worker processes |
 | 6 | Frontend and Python backend are parallel implementations, not integrated | Both use identical logic and schemas | In production, frontend proxies to Python backend |
 | 7 | No structured logging | FastAPI default logs | JSON logs with correlation IDs via `structlog` |
 
@@ -305,14 +305,14 @@
 
 ## Production Hardening Roadmap
 
-1. **Async queue** — Celery + Redis or AWS SQS for large PDF batches; decouple upload from processing.
-2. **OCR service** — AWS Textract, Azure Document Intelligence, or Google Document AI for scanned invoices.
-3. **PostgreSQL / Supabase** — production-grade database. Drop-in via `DATABASE_URL` change.
+1. **Async queue** — queued workers for large PDF batches; decouple upload from processing.
+2. **OCR service** — managed OCR for scanned invoices.
+3. **Production database** — durable relational database. Drop-in via `DATABASE_URL` change.
 4. **Object storage** — S3 or GCS for uploaded PDFs with signed URL retrieval.
 5. **Auth layer** — API key or OAuth2 client credentials via FastAPI's `HTTPBearer`.
-6. **Rate limiting** — per-client throttle with `slowapi` or AWS API Gateway.
+6. **Rate limiting** — per-client throttling at the API or gateway layer.
 7. **Observability** — `prometheus-fastapi-instrumentator` + Grafana; OpenTelemetry traces per extraction stage.
-8. **Structured logs** — JSON logs with correlation IDs for Datadog/Splunk ingestion.
+8. **Structured logs** — JSON logs with correlation IDs for log aggregation and tracing.
 9. **Model/version tracking** — log model name and version per extraction; detect quality drift over time.
 10. **Human review workflow** — invoices with high-severity warnings route to a review queue.
 11. **Kubernetes** — horizontal pod autoscaling for the FastAPI backend; see `k8s/` for reference manifests.

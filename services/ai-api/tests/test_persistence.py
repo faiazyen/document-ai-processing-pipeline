@@ -21,7 +21,7 @@ def _sample_extraction(**kwargs) -> InvoiceExtraction:
     defaults = dict(
         document_type="invoice",
         supplier_name="Acme Textiles",
-        buyer_name="Merch Maverick Ltd",
+        buyer_name="Atlas Retail Group",
         invoice_number="INV-001",
         invoice_date="2024-01-15",
         total_amount=1200.0,

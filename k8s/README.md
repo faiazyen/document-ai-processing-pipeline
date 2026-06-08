@@ -49,8 +49,8 @@ kubectl apply -f k8s/
 
 ## Production Notes
 
-- **SQLite is not suitable for multi-replica deployments.** Replace `DATABASE_URL` with a PostgreSQL connection string and use a `PersistentVolumeClaim` for the database, or use a managed DB (RDS, Cloud SQL, Supabase).
-- **Secrets** should be managed with AWS Secrets Manager, Google Secret Manager, or HashiCorp Vault — not plain Kubernetes Secrets in production.
+- **SQLite is not suitable for multi-replica deployments.** Replace `DATABASE_URL` with a durable relational database connection string and use a `PersistentVolumeClaim` only for local or single-node testing.
+- **Secrets** should be managed with an external secrets manager, not plain Kubernetes Secrets in production.
 - **HPA** requires the Kubernetes metrics server. Install with: `minikube addons enable metrics-server`
 - **Ingress** is not included. Add an `nginx-ingress` or `traefik` ingress controller for hostname-based routing.
 
