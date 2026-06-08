@@ -171,9 +171,9 @@ docker compose down
 
 | Suite | Tests |
 | --- | ---: |
-| TypeScript / Vitest | 5 |
+| TypeScript / Vitest | 11 |
 | Python / pytest | 27 |
-| Total | 32 |
+| Total | 38 |
 
 Tests cover fallback extraction, validation rules, persistence, health/metrics endpoints, OpenAPI exposure, and API error response shape.
 

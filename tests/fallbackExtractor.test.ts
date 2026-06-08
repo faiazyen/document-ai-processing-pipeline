@@ -7,7 +7,7 @@ Northstar Print Studio
 Invoice Number: MM-2026-0042
 Invoice Date: 2026-06-08
 Due Date: 2026-06-30
-Bill To: Acme Retail Group
+Bill To: Atlas Retail Group
 Payment Terms: Net 30
 Custom Embroidered Hoodies 120 24.50 2940.00
 Subtotal USD 2940.00
@@ -23,7 +23,7 @@ describe("fallbackExtractInvoice", () => {
     expect(result.invoice_number).toBe("MM-2026-0042");
     expect(result.invoice_date).toBe("2026-06-08");
     expect(result.due_date).toBe("2026-06-30");
-    expect(result.buyer_name).toBe("Acme Retail Group");
+    expect(result.buyer_name).toBe("Atlas Retail Group");
     expect(result.currency).toBe("USD");
     expect(result.subtotal).toBe(2940);
     expect(result.vat_amount).toBe(588);
