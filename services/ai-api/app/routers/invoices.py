@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import json
 import time
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from fastapi.responses import JSONResponse
 
 from app.config import settings
 from app.schemas import (
@@ -13,11 +11,18 @@ from app.schemas import (
     HealthResponse,
     MetricsResponse,
     ErrorResponse,
+    ValidationWarning,
 )
 from app.services.extract_text import extract_text_from_pdf, is_scanned_pdf
 from app.services.fallback_extract import fallback_extract_invoice, merge_with_fallback
 from app.services.validate_invoice import validate_invoice
-from app.services.persistence import save_invoice, get_invoice_by_id, get_all_invoices, record_to_summary
+from app.services.persistence import (
+    get_all_invoices,
+    get_database_kind,
+    get_invoice_by_id,
+    record_to_summary,
+    save_invoice,
+)
 from app.services import metrics
 
 router = APIRouter()
@@ -36,10 +41,18 @@ def _should_use_fallback(warning_codes: list[str], confidence: float) -> bool:
     response_model=InvoiceResponse,
     summary="Upload and process a PDF invoice",
     description="Accept a PDF file, extract text, run AI and fallback extraction, validate, persist, and return structured invoice data.",
+    responses={
+        400: {"model": ErrorResponse, "description": "Invalid file or empty upload"},
+        413: {"model": ErrorResponse, "description": "PDF exceeds the upload limit"},
+        415: {"model": ErrorResponse, "description": "Unsupported media type"},
+        422: {"model": ErrorResponse, "description": "PDF text extraction or request validation failed"},
+    },
 )
 async def process_invoice(file: UploadFile = File(..., description="PDF invoice file")):
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are accepted.")
+    if file.content_type and file.content_type not in ACCEPTED_CONTENT_TYPES:
+        raise HTTPException(status_code=415, detail="Only PDF uploads are accepted.")
 
     file_bytes = await file.read()
     if len(file_bytes) > MAX_FILE_SIZE_BYTES:
@@ -62,7 +75,7 @@ async def process_invoice(file: UploadFile = File(..., description="PDF invoice 
 
     if scanned:
         extraction.validation_warnings.append(
-            __import__("app.schemas", fromlist=["ValidationWarning"]).ValidationWarning(
+            ValidationWarning(
                 code="scanned_pdf_requires_ocr",
                 severity="high",
                 message=(
@@ -136,6 +149,7 @@ def list_invoices():
     "/invoices/{invoice_id}",
     response_model=InvoiceResponse,
     summary="Get a single processed invoice by ID",
+    responses={404: {"model": ErrorResponse, "description": "Invoice not found"}},
 )
 def get_invoice(invoice_id: int):
     record = get_invoice_by_id(invoice_id)
@@ -162,7 +176,7 @@ def health():
         status="ok",
         version=settings.app_version,
         openai_configured=bool(settings.openai_api_key),
-        database="sqlite",
+        database=get_database_kind(),
     )
 
 

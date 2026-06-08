@@ -39,10 +39,10 @@ Swagger UI is available at: http://localhost:8000/docs
 
 ```bash
 # from services/ai-api/
-pytest tests/ -v
+python -m pytest tests/ -v
 ```
 
-All 24 tests should pass. Tests cover validation logic, fallback extraction, persistence (in-memory SQLite), and API health/metrics endpoints.
+All 27 tests should pass. Tests cover validation logic, fallback extraction, persistence (in-memory SQLite), API health/metrics endpoints, OpenAPI exposure, and consistent error responses.
 
 ## Environment Variables
 
@@ -51,6 +51,7 @@ All 24 tests should pass. Tests cover validation logic, fallback extraction, per
 | OPENAI_API_KEY | (empty) | Required for AI extraction. Fallback is used if missing. |
 | OPENAI_MODEL | gpt-4.1-mini | OpenAI model name |
 | DATABASE_URL | sqlite:///./invoices.db | SQLAlchemy connection string |
+| CORS_ALLOW_ORIGIN_REGEX | `^https://.*\.vercel\.app$` | Optional Vercel preview origin regex |
 
 ## Project Structure
 
@@ -79,7 +80,7 @@ tests/
 
 ## Production Notes
 
-SQLite is used for the portfolio demo. Replace with PostgreSQL/Supabase by changing `DATABASE_URL`. The schema is identical.
+SQLite is used for the portfolio demo. Replace with PostgreSQL/Supabase by changing `DATABASE_URL`; `psycopg` is included for PostgreSQL deployments.
 
 If `OPENAI_API_KEY` is missing or OpenAI fails, the API degrades gracefully to rule-based fallback extraction instead of crashing.
 

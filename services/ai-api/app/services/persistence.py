@@ -3,11 +3,29 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 from sqlalchemy import create_engine, Column, Integer, String, Float, Text, DateTime
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Session
 from app.config import settings
 from app.schemas import InvoiceExtraction, InvoiceSummary
 
-engine = create_engine(settings.database_url, connect_args={"check_same_thread": False})
+
+def _connect_args(database_url: str) -> dict[str, bool]:
+    if database_url.startswith("sqlite"):
+        return {"check_same_thread": False}
+    return {}
+
+
+def make_engine(database_url: str | None = None) -> Engine:
+    url = database_url or settings.database_url
+    return create_engine(url, connect_args=_connect_args(url), pool_pre_ping=True)
+
+
+def get_database_kind(database_url: str | None = None) -> str:
+    url = database_url or settings.database_url
+    return url.split(":", 1)[0]
+
+
+engine = make_engine()
 
 
 class Base(DeclarativeBase):

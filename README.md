@@ -64,6 +64,7 @@ Frontend (Next.js + TypeScript)          Backend (Python FastAPI)
 - `pypdf` — PDF text extraction
 - `openai` Python SDK — LLM structured extraction
 - SQLAlchemy + SQLite — persistence and audit log
+- PostgreSQL-compatible SQLAlchemy configuration for production
 - Pydantic v2 — request/response schemas
 - pytest + anyio — async test suite
 
@@ -189,7 +190,7 @@ npm run build        # production build
 
 # Python backend
 cd services/ai-api
-pytest tests/ -v     # 24 tests
+python -m pytest tests/ -v
 
 # Docker
 docker compose up --build
@@ -203,10 +204,10 @@ docker compose down
 | Suite | Tests | Status |
 |-------|-------|--------|
 | TypeScript / Vitest | 5 | Passing |
-| Python / pytest | 24 | Passing |
-| **Total** | **29** | **All passing** |
+| Python / pytest | 27 | Passing |
+| **Total** | **32** | **All passing** |
 
-Python tests cover: validation rules, fallback extraction, SQLite persistence, health and metrics endpoints.
+Python tests cover: validation rules, fallback extraction, SQLite persistence, health and metrics endpoints, OpenAPI exposure, and consistent API error responses.
 
 ---
 

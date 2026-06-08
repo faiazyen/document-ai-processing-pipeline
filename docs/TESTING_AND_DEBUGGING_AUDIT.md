@@ -1,7 +1,7 @@
 # Testing and Debugging Audit
 
 **Project:** Document AI Processing Pipeline by MaverickIQ
-**Audit Date:** 2024-06-08
+**Audit Date:** 2026-06-08
 **Author:** Faiaz Mazumder
 **Test Suites:** Vitest (TypeScript) + pytest (Python)
 
@@ -12,8 +12,8 @@
 | Suite | Tests | Passed | Failed | Status |
 |-------|-------|--------|--------|--------|
 | TypeScript / Vitest | 5 | 5 | 0 | PASS |
-| Python / pytest | 24 | 24 | 0 | PASS |
-| **Total** | **29** | **29** | **0** | **ALL PASS** |
+| Python / pytest | 27 | 27 | 0 | PASS |
+| **Total** | **32** | **32** | **0** | **ALL PASS** |
 
 ---
 
@@ -36,12 +36,24 @@
 
 | Field | Value |
 |-------|-------|
-| **Test name** | Manual / integration |
+| **Test name** | `test_invalid_upload_returns_consistent_error_shape` |
 | **Purpose** | Reject files that are not PDFs (e.g., `.docx`, `.png`, `.txt`). |
 | **Expected result** | HTTP 400 with `"Only PDF files are accepted."` |
 | **Actual result** | FastAPI router checks `file.filename.lower().endswith(".pdf")` and raises 400. |
-| **Status** | PASS (manual verification) |
+| **Status** | PASS |
 | **Notes** | Next.js route relies on `pdf-parse` throwing on invalid input. Python backend enforces extension check explicitly. |
+
+---
+
+### 2b. Wrong PDF Content Type
+
+| Field | Value |
+|-------|-------|
+| **Test name** | `test_wrong_content_type_for_pdf_name_is_rejected` |
+| **Purpose** | Prevent files named `.pdf` but submitted with unsupported media types from reaching the parser. |
+| **Expected result** | HTTP 415 with consistent `{"error": "...", "detail": null}` body. |
+| **Actual result** | FastAPI router rejects unsupported `file.content_type`. |
+| **Status** | PASS |
 
 ---
 
@@ -222,27 +234,39 @@
 
 ---
 
-### 17. Docker Compose Startup
+### 17. OpenAPI / Swagger Contract
 
 | Field | Value |
 |-------|-------|
-| **Test name** | Manual verification |
-| **Purpose** | Both services start, backend health check passes, frontend loads. |
-| **Expected result** | `docker compose up --build` brings both services to healthy state. |
-| **Actual result** | Verified locally. Backend health check responds after ~10s. |
-| **Status** | PASS (manual) |
-| **Notes** | Frontend `depends_on` backend with `condition: service_healthy` ensures correct startup order. |
+| **Test name** | `test_openapi_documents_core_invoice_endpoints` |
+| **Purpose** | Confirm Swagger/OpenAPI exposes the core invoice API and documented error statuses. |
+| **Expected result** | `/openapi.json` includes process, list, get, health, metrics, and 415 upload response metadata. |
+| **Actual result** | OpenAPI path and response metadata assertions pass. |
+| **Status** | PASS |
 
 ---
 
-### 18. CI Pipeline
+### 18. Docker Compose Startup
+
+| Field | Value |
+|-------|-------|
+| **Test name** | `docker compose build`, `docker compose up -d`, HTTP smoke checks |
+| **Purpose** | Both services start, backend health check passes, frontend loads. |
+| **Expected result** | `docker compose up --build` brings both services to healthy state. |
+| **Actual result** | Compose builds both images, backend reaches healthy, frontend returns HTTP 200, backend `/health` returns OK, and `/openapi.json` exposes core paths. |
+| **Status** | PASS |
+| **Notes** | Frontend `depends_on` backend with `condition: service_healthy` ensures correct startup order. Backend data persists at `/app/data` without masking application source. |
+
+---
+
+### 19. CI Pipeline
 
 | Field | Value |
 |-------|-------|
 | **Test name** | `.github/workflows/ci.yml` |
 | **Purpose** | Automated gate on every push and PR covering both frontend and backend. |
 | **Expected result** | Both `frontend` and `backend` jobs pass. |
-| **Actual result** | Frontend: lint + 5 Vitest tests + build. Backend: 24 pytest tests. |
+| **Actual result** | Frontend: lint + 5 Vitest tests + build. Backend: 27 pytest tests. |
 | **Status** | PASS |
 | **Notes** | Python tests run with `OPENAI_API_KEY=""` and `DATABASE_URL="sqlite:///:memory:"` — no secrets in CI. |
 
@@ -256,6 +280,12 @@
 | 2 | `persistence.py` `created_at` lacked null guard in `record_to_summary` | Added `if record.created_at else ""` guard | Fixed |
 | 3 | Router `ValidationWarning` imported via fragile `__import__` in scanned PDF path | Refactored to proper top-level import | Fixed |
 | 4 | `merge_with_fallback` in Python set `extraction_source` as string literal not enum value | Updated to use string literal accepted by Pydantic `ExtractionSource` | Fixed |
+| 5 | Frontend Dockerfile expected `.next/standalone`, but Next config did not emit standalone output | Added `output: "standalone"` to `next.config.ts` | Fixed |
+| 6 | Docker Compose mounted `backend_data` over `/app`, which could hide backend source code in the container | Changed volume mount to `/app/data` and SQLite path to `/app/data/invoices.db` | Fixed |
+| 7 | FastAPI HTTP errors used default `{"detail": ...}` shape while docs defined an `ErrorResponse` model | Added exception handlers returning `{"error": ..., "detail": ...}` | Fixed |
+| 8 | Vercel preview CORS used `https://*.vercel.app`, which Starlette does not treat as a wildcard origin | Replaced with `allow_origin_regex` setting | Fixed |
+| 9 | PostgreSQL was documented as production-ready, but requirements lacked a PostgreSQL driver | Added `psycopg[binary]` and database-kind detection | Fixed |
+| 10 | Backend Docker image installed `gcc`, adding ~180 MB and slow builds despite wheel-based dependencies | Removed compiler layer and verified backend image still builds | Fixed |
 
 ---
 

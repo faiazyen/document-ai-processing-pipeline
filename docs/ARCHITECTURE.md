@@ -4,6 +4,11 @@
 
 The app behaves like a small Rossum-style invoice processing system: parse a document, extract fields with an AI model, distrust the model enough to validate it, and return an explainable result.
 
+The repository has two execution surfaces:
+
+- **Next.js frontend/API route** for the hosted portfolio dashboard and Vercel deployment.
+- **Python FastAPI backend** for Swagger/OpenAPI, persistence, Docker Compose, health checks, metrics, and microservice-style GenAI role coverage.
+
 ## Runtime Flow
 
 ```text
@@ -37,7 +42,9 @@ AI output is treated as a candidate extraction, not truth. The app runs determin
 
 ## Vercel Readiness
 
-The API route uses the Node.js runtime because PDF parsing runs server-side. `vercel.json` declares the Next.js framework and build/install commands. Production deployment requires setting `OPENAI_API_KEY` in Vercel environment variables.
+The Next.js app deploys to Vercel. The API route uses the Node.js runtime because PDF parsing runs server-side. `vercel.json` declares the Next.js framework and build/install commands. Production deployment requires setting `OPENAI_API_KEY` in Vercel environment variables.
+
+The Python FastAPI backend is containerized separately. For production, deploy it to a container platform such as Render, Fly.io, ECS, Cloud Run, Kubernetes, or a Vercel-compatible external API host, then point the frontend or integrations at that backend URL.
 
 ## Future Production Extensions
 

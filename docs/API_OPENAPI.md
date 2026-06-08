@@ -67,6 +67,15 @@ Upload a PDF invoice for end-to-end AI extraction and validation.
 }
 ```
 
+**Error response shape**
+
+```json
+{
+  "error": "Only PDF uploads are accepted.",
+  "detail": null
+}
+```
+
 **Error cases**
 
 | Status | Reason |
@@ -74,6 +83,7 @@ Upload a PDF invoice for end-to-end AI extraction and validation.
 | 400 | Non-PDF file type |
 | 400 | Empty file |
 | 413 | File exceeds 20 MB |
+| 415 | Unsupported upload content type |
 | 422 | PDF parsing failure (corrupt file) |
 | 500 | Unexpected server error |
 
@@ -181,7 +191,7 @@ curl http://localhost:8000/health
 
 # Upload a PDF (replace with a real PDF path)
 curl -X POST http://localhost:8000/process-invoice \
-  -F "file=@samples/sample-invoice.pdf"
+  -F "file=@../../samples/sample-invoice.pdf"
 
 # List invoices
 curl http://localhost:8000/invoices

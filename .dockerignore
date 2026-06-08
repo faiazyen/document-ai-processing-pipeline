@@ -1,0 +1,15 @@
+.git
+.github
+.next
+.vercel
+node_modules
+coverage
+npm-debug.log*
+.env*
+!.env.example
+services/ai-api/.venv
+services/ai-api/.pytest_cache
+services/ai-api/invoices.db
+services/ai-api/**/__pycache__
+services/ai-api/**/*.pyc
+screenshots
