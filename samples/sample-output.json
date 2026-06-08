@@ -1,0 +1,33 @@
+{
+  "success": true,
+  "document_type": "invoice",
+  "extraction_source": "openai_with_fallback",
+  "confidence_score": 0.91,
+  "extraction": {
+    "document_type": "invoice",
+    "supplier_name": "The Merch Maverick",
+    "supplier_country": "United States",
+    "buyer_name": "Acme Retail Group",
+    "invoice_number": "MM-2026-0042",
+    "invoice_date": "2026-06-08",
+    "due_date": "2026-06-30",
+    "currency": "USD",
+    "subtotal": 2940,
+    "vat_amount": 588,
+    "total_amount": 3528,
+    "line_items": [
+      {
+        "description": "Custom Embroidered Hoodies",
+        "quantity": 120,
+        "unit_price": 24.5,
+        "total": 2940
+      }
+    ],
+    "payment_terms": "Net 30",
+    "confidence_score": 0.91,
+    "uncertainty_notes": []
+  },
+  "validation_warnings": [],
+  "raw_text_preview": "The Merch Maverick Invoice Number: MM-2026-0042...",
+  "processing_ms": 1840
+}
