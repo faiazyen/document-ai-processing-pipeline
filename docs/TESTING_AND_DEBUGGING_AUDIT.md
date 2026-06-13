@@ -11,9 +11,9 @@
 
 | Suite | Tests | Passed | Failed | Status |
 |-------|-------|--------|--------|--------|
-| TypeScript / Vitest | 5 | 5 | 0 | PASS |
-| Python / pytest | 27 | 27 | 0 | PASS |
-| **Total** | **32** | **32** | **0** | **ALL PASS** |
+| TypeScript / Vitest | 11 | 11 | 0 | PASS |
+| Python / pytest | 32 | 32 | 0 | PASS |
+| **Total** | **43** | **43** | **0** | **ALL PASS** |
 
 ---
 

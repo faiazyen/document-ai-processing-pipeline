@@ -12,7 +12,7 @@ WHEN LANGCHAIN IS BETTER THAN DIRECT SDK:
 - Multi-step reasoning chains (extract → validate → summarize → route).
 - Tool use / function calling with external APIs inside the chain.
 - Memory / conversation history across turns.
-- Agent loops with dynamic tool selection.
+- Dynamic tool-selection workflows.
 - RAG pipelines with retrieval + generation in a single chain.
 
 WHEN DIRECT SDK IS BETTER (this use case):
