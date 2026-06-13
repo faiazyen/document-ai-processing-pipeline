@@ -12,11 +12,16 @@ async def test_openapi_documents_core_invoice_endpoints():
     assert response.status_code == 200
     paths = response.json()["paths"]
     assert "/process-invoice" in paths
+    assert "/inference/jobs" in paths
+    assert "/inference/jobs/{job_id}" in paths
+    assert "/tenants/me" in paths
+    assert "/tenants/me/usage" in paths
     assert "/invoices" in paths
     assert "/invoices/{invoice_id}" in paths
     assert "/health" in paths
     assert "/metrics" in paths
     assert "415" in paths["/process-invoice"]["post"]["responses"]
+    assert "401" in paths["/inference/jobs"]["post"]["responses"]
 
 
 @pytest.mark.anyio

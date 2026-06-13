@@ -25,8 +25,11 @@ async def test_metrics_returns_expected_shape():
         "processed_documents",
         "failed_documents",
         "average_processing_ms",
+        "p95_processing_ms",
+        "p95_llm_ms",
         "fallback_rate",
         "validation_warning_count",
+        "estimated_cost_usd",
     }
     assert expected_keys.issubset(data.keys())
     assert isinstance(data["processed_documents"], int)

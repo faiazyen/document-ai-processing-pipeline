@@ -91,7 +91,13 @@ Upload a PDF invoice for end-to-end AI extraction and validation.
 
 ### GET /invoices
 
-Return a list of all processed invoice summaries from the database, ordered newest first.
+Return authenticated tenant invoice summaries from the database, ordered newest first.
+
+Requires:
+
+```text
+X-API-Key: <tenant-api-key>
+```
 
 **Response 200**
 
@@ -118,7 +124,13 @@ Return a list of all processed invoice summaries from the database, ordered newe
 
 ### GET /invoices/{id}
 
-Return full extraction result for a single invoice by database ID.
+Return full extraction result for a single invoice by database ID. The lookup is tenant-scoped; a valid tenant cannot read another tenant's invoice.
+
+Requires:
+
+```text
+X-API-Key: <tenant-api-key>
+```
 
 **Path parameter**
 
@@ -131,6 +143,75 @@ Return full extraction result for a single invoice by database ID.
 | Status | Reason |
 |--------|--------|
 | 404 | Invoice not found |
+
+---
+
+### POST /inference/jobs
+
+Create an authenticated async inference job. The API persists a queued job immediately, processes the PDF in a background task, and lets clients poll by job ID.
+
+Requires:
+
+```text
+X-API-Key: <tenant-api-key>
+```
+
+Optional idempotency:
+
+```text
+Idempotency-Key: stable-client-generated-key
+```
+
+**Response 200**
+
+```json
+{
+  "job_id": "8f0ed45f-5c72-4f7d-a2ff-3f5e1f9c5c08",
+  "tenant_id": "personal-lab",
+  "status": "queued",
+  "request_id": "41e1d5f6-2f4a-4c3e-a7d1-12e8fb3167cf",
+  "region": "local"
+}
+```
+
+### GET /inference/jobs
+
+List authenticated tenant jobs.
+
+### GET /inference/jobs/{job_id}
+
+Read one authenticated tenant job, including status, validation result, latency fields, and estimated cost.
+
+**Response 200**
+
+```json
+{
+  "job_id": "8f0ed45f-5c72-4f7d-a2ff-3f5e1f9c5c08",
+  "tenant_id": "personal-lab",
+  "filename": "invoice.pdf",
+  "status": "succeeded",
+  "request_id": "41e1d5f6-2f4a-4c3e-a7d1-12e8fb3167cf",
+  "region": "local",
+  "processing_ms": 932.4,
+  "llm_ms": 615.2,
+  "validation_warning_count": 0,
+  "cost": {
+    "model_name": "gpt-4.1-mini",
+    "input_tokens": 1200,
+    "output_tokens": 310,
+    "total_tokens": 1510,
+    "estimated_cost_usd": 0.001
+  }
+}
+```
+
+### GET /tenants/me
+
+Read authenticated tenant configuration: tenant ID, status, preferred model, region preference, and optional limits.
+
+### GET /tenants/me/usage
+
+Read authenticated tenant usage totals: processed jobs, failed jobs, input/output tokens, and estimated cost.
 
 ---
 
@@ -164,8 +245,11 @@ In-memory processing counters. Resets on service restart.
   "processed_documents": 17,
   "failed_documents": 1,
   "average_processing_ms": 1253.4,
+  "p95_processing_ms": 1840.2,
+  "p95_llm_ms": 1412.8,
   "fallback_rate": 0.235,
-  "validation_warning_count": 34
+  "validation_warning_count": 34,
+  "estimated_cost_usd": 0.0412
 }
 ```
 
@@ -174,8 +258,11 @@ In-memory processing counters. Resets on service restart.
 | processed_documents | Total successful invoice processing calls |
 | failed_documents | Total failed processing calls |
 | average_processing_ms | Mean end-to-end processing time in ms |
+| p95_processing_ms | In-memory p95 sample of end-to-end processing time |
+| p95_llm_ms | In-memory p95 sample of OpenAI call duration |
 | fallback_rate | Fraction of documents that used fallback (0–1) |
 | validation_warning_count | Cumulative count of warnings across all invoices |
+| estimated_cost_usd | Cumulative estimated OpenAI cost when token pricing is configured |
 
 ---
 
@@ -193,8 +280,14 @@ curl http://localhost:8000/health
 curl -X POST http://localhost:8000/process-invoice \
   -F "file=@../../samples/sample-invoice.pdf"
 
-# List invoices
-curl http://localhost:8000/invoices
+# Authenticated platform job
+curl -X POST http://localhost:8000/inference/jobs \
+  -H "X-API-Key: $PLATFORM_DEV_API_KEY" \
+  -F "file=@../../samples/sample-invoice.pdf"
+
+# List authenticated tenant invoices
+curl -H "X-API-Key: $PLATFORM_DEV_API_KEY" \
+  http://localhost:8000/invoices
 
 # Metrics
 curl http://localhost:8000/metrics

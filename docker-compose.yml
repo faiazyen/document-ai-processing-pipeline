@@ -8,7 +8,14 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4.1-mini}
+      - OPENAI_INPUT_USD_PER_1M_TOKENS=${OPENAI_INPUT_USD_PER_1M_TOKENS:-0}
+      - OPENAI_OUTPUT_USD_PER_1M_TOKENS=${OPENAI_OUTPUT_USD_PER_1M_TOKENS:-0}
       - DATABASE_URL=sqlite:////app/data/invoices.db
+      - PLATFORM_DEV_API_KEY=${PLATFORM_DEV_API_KEY:-}
+      - API_KEY_HASH_SECRET=${API_KEY_HASH_SECRET:-local-development-secret}
+      - DEFAULT_TENANT_ID=${DEFAULT_TENANT_ID:-personal-lab}
+      - DEFAULT_TENANT_NAME=${DEFAULT_TENANT_NAME:-Personal Lab}
+      - DEFAULT_REGION=${DEFAULT_REGION:-local}
     volumes:
       - backend_data:/app/data
     healthcheck:

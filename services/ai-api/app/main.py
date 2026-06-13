@@ -18,9 +18,10 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.app_name,
     description=(
-        "B2B invoice AI extraction pipeline. "
-        "Supports PDF upload, OpenAI structured extraction, deterministic validation, "
-        "rule-based fallback, SQLite audit log, and in-memory metrics."
+        "Tenant-aware document inference API. "
+        "Supports PDF upload, async inference jobs, OpenAI structured extraction, "
+        "deterministic validation, rule-based fallback, SQLite audit log, "
+        "usage accounting, and in-memory latency/cost metrics."
     ),
     version=settings.app_version,
     lifespan=lifespan,

@@ -7,7 +7,7 @@ The app behaves like a small invoice-processing system: parse a document, extrac
 The repository has two execution surfaces:
 
 - **Next.js frontend/API route** for the hosted dashboard and Vercel deployment.
-- **Python FastAPI backend** for Swagger/OpenAPI, persistence, Docker Compose, health checks, metrics, and microservice-style GenAI role coverage.
+- **Python FastAPI backend** for Swagger/OpenAPI, tenant-aware access, async job records, persistence, Docker Compose, health checks, p95 latency metrics, and estimated cost tracking.
 
 ## Runtime Flow
 
@@ -20,6 +20,21 @@ Client upload UI
   -> fallback merge when critical values are missing or confidence is low
   -> deterministic validation
   -> JSON response rendered by the dashboard
+```
+
+## Platform API Flow
+
+```text
+API client
+  -> X-API-Key tenant resolution
+  -> POST /inference/jobs
+  -> persisted job: queued
+  -> background worker execution: processing
+  -> PDF text extraction
+  -> OpenAI extraction when configured
+  -> fallback extraction and deterministic validation
+  -> persisted invoice result and tenant usage
+  -> job status: succeeded or failed
 ```
 
 ## Layering
@@ -36,9 +51,13 @@ Client upload UI
 
 AI output is treated as a candidate extraction, not truth. The app runs deterministic validation every time. If OpenAI is unavailable, malformed, low-confidence, or missing critical fields, the fallback extractor fills the most important values and the response clearly marks the extraction source.
 
+The FastAPI surface also persists job state and tenant usage so API clients can poll for results instead of relying only on synchronous request/response processing.
+
 ## Security And Secrets
 
 `OPENAI_API_KEY` is read only from server-side environment variables. No secret is exposed to client components. `.env*` files are ignored, while `.env.example` documents required configuration.
+
+Platform endpoints require `X-API-Key`. API keys are HMAC-hashed before storage; tenant lookups compare hashes rather than raw keys. Tenant-scoped queries prevent one tenant from reading another tenant's jobs or invoices.
 
 ## Vercel Readiness
 
@@ -50,6 +69,7 @@ The Python FastAPI backend is containerized separately. For production, deploy i
 
 - OCR for scanned image-only PDFs.
 - Object storage for uploaded documents and outputs.
+- Durable queue and independent worker deployment.
 - Human review queue for high-severity warnings.
 - OpenTelemetry traces around extraction stages.
 - Drift monitoring for field-level extraction quality.

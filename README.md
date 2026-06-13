@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/faiazyen/document-ai-processing-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/faiazyen/document-ai-processing-pipeline/actions/workflows/ci.yml)
 
-A personal document-processing experiment for extracting structured invoice data from PDF files. The project combines a Next.js dashboard, a Python FastAPI service, deterministic validation, fallback extraction, persistence, tests, Docker, and deployment-ready configuration.
+A personal document-processing experiment for extracting structured invoice data from PDF files. The project combines a Next.js dashboard, a tenant-aware Python FastAPI service, deterministic validation, fallback extraction, async inference jobs, usage accounting, tests, Docker, and deployment-ready configuration.
 
 The goal is simple: take an invoice PDF, extract useful text, ask an LLM for structured fields, verify the result with deterministic rules, and show the final JSON in a way that is easy to inspect.
 
@@ -28,7 +28,7 @@ graph TD
 The repository includes two ways to run the pipeline:
 
 - **Next.js app**: interactive dashboard and API route for PDF uploads.
-- **FastAPI service**: standalone REST API with Swagger/OpenAPI, persistence, health checks, and metrics.
+- **FastAPI service**: tenant-aware REST API with Swagger/OpenAPI, persistence, async jobs, health checks, p95 latency metrics, and estimated cost tracking.
 
 ---
 
@@ -75,6 +75,9 @@ The repository includes two ways to run the pipeline:
 - Uses fallback rules when structured extraction is incomplete.
 - Validates missing fields, currency, totals, tax arithmetic, line items, and confidence.
 - Persists processed invoices through the FastAPI service.
+- Supports tenant-scoped FastAPI access through hashed API keys.
+- Creates async inference jobs with persisted job state.
+- Tracks p95 processing latency and estimated OpenAI cost when pricing is configured.
 - Exposes `/health`, `/metrics`, `/docs`, and `/openapi.json`.
 - Renders confidence, warnings, and final JSON in the UI.
 
@@ -120,10 +123,17 @@ Core endpoints:
 | Method | Path | Description |
 | --- | --- | --- |
 | POST | `/process-invoice` | Upload and process a PDF invoice |
-| GET | `/invoices` | List processed invoice summaries |
-| GET | `/invoices/{id}` | Read one processed invoice |
+| POST | `/inference/jobs` | Create an authenticated tenant-scoped async job |
+| GET | `/inference/jobs` | List authenticated tenant jobs |
+| GET | `/inference/jobs/{job_id}` | Read one authenticated tenant job |
+| GET | `/tenants/me` | Read authenticated tenant configuration |
+| GET | `/tenants/me/usage` | Read tenant usage and estimated cost |
+| GET | `/invoices` | List authenticated tenant invoice summaries |
+| GET | `/invoices/{id}` | Read one authenticated tenant invoice |
 | GET | `/health` | Service status |
-| GET | `/metrics` | In-memory processing counters |
+| GET | `/metrics` | In-memory processing, p95 latency, and cost counters |
+
+Platform endpoints require `X-API-Key`. For local development, set `PLATFORM_DEV_API_KEY` in `services/ai-api/.env`; startup seeds the default tenant and stores only a hashed API key.
 
 ---
 
@@ -172,10 +182,10 @@ docker compose down
 | Suite | Tests |
 | --- | ---: |
 | TypeScript / Vitest | 11 |
-| Python / pytest | 27 |
-| Total | 38 |
+| Python / pytest | 32 |
+| Total | 43 |
 
-Tests cover fallback extraction, validation rules, persistence, health/metrics endpoints, OpenAPI exposure, and API error response shape.
+Tests cover fallback extraction, validation rules, persistence, tenant isolation, API-key auth, usage aggregation, health/metrics endpoints, OpenAPI exposure, and API error response shape.
 
 ---
 
@@ -219,8 +229,9 @@ Known limitations:
 - OCR is not implemented yet.
 - The fallback extractor is intentionally conservative.
 - Metrics are in-memory and reset on restart.
-- Authentication and rate limiting are not included.
-- Large batch processing would need a queue-based worker design.
+- Async jobs currently use FastAPI background execution; a durable external queue is the next production step.
+- Autoscaling manifests are reference configuration, not proof of measured production scale.
+- The project defines SLO targets and metrics, but does not claim measured 99.95% production availability.
 
 Future improvements:
 
@@ -228,5 +239,6 @@ Future improvements:
 - Field-level confidence.
 - Labeled fixture set for extraction-quality regression tests.
 - Object storage for uploaded PDFs.
-- Authenticated API access.
+- Durable queue and independent worker deployment.
 - Prometheus/OpenTelemetry instrumentation.
+- Region-aware routing beyond job metadata.

@@ -18,6 +18,20 @@ class WarningSeverity(str, Enum):
     high = "high"
 
 
+class TenantStatus(str, Enum):
+    active = "active"
+    inactive = "inactive"
+
+
+class JobStatus(str, Enum):
+    queued = "queued"
+    processing = "processing"
+    succeeded = "succeeded"
+    failed = "failed"
+    retrying = "retrying"
+    dead_lettered = "dead_lettered"
+
+
 class ValidationWarning(BaseModel):
     code: str
     severity: WarningSeverity
@@ -53,6 +67,8 @@ class InvoiceExtraction(BaseModel):
 
 class InvoiceResponse(BaseModel):
     id: int
+    tenant_id: Optional[str] = None
+    request_id: Optional[str] = None
     filename: str
     extraction: InvoiceExtraction
     raw_text_preview: str
@@ -61,6 +77,7 @@ class InvoiceResponse(BaseModel):
 
 class InvoiceSummary(BaseModel):
     id: int
+    tenant_id: Optional[str] = None
     filename: str
     document_type: str
     supplier_name: Optional[str]
@@ -74,6 +91,61 @@ class InvoiceSummary(BaseModel):
     created_at: str
 
 
+class TenantInfo(BaseModel):
+    tenant_id: str
+    name: str
+    status: TenantStatus
+    preferred_model: str
+    region_preference: str
+    monthly_request_limit: Optional[int] = None
+    monthly_cost_limit_usd: Optional[float] = None
+
+
+class InferenceJobAccepted(BaseModel):
+    job_id: str
+    tenant_id: str
+    status: JobStatus
+    request_id: str
+    region: str
+
+
+class CostSummary(BaseModel):
+    model_name: Optional[str] = None
+    input_tokens: int = 0
+    output_tokens: int = 0
+    total_tokens: int = 0
+    estimated_cost_usd: float = 0.0
+
+
+class InferenceJobResponse(BaseModel):
+    job_id: str
+    tenant_id: str
+    filename: str
+    status: JobStatus
+    request_id: str
+    region: str
+    idempotency_key: Optional[str] = None
+    extraction: Optional[InvoiceExtraction] = None
+    raw_text_preview: str = ""
+    error_message: Optional[str] = None
+    queue_wait_ms: Optional[float] = None
+    processing_ms: Optional[float] = None
+    llm_ms: Optional[float] = None
+    validation_warning_count: int = 0
+    cost: CostSummary = Field(default_factory=CostSummary)
+    created_at: str
+    updated_at: str
+
+
+class TenantUsageResponse(BaseModel):
+    tenant_id: str
+    processed_jobs: int
+    failed_jobs: int
+    total_input_tokens: int
+    total_output_tokens: int
+    estimated_cost_usd: float
+
+
 class HealthResponse(BaseModel):
     status: str
     version: str
@@ -85,8 +157,11 @@ class MetricsResponse(BaseModel):
     processed_documents: int
     failed_documents: int
     average_processing_ms: float
+    p95_processing_ms: float = 0.0
+    p95_llm_ms: float = 0.0
     fallback_rate: float
     validation_warning_count: int
+    estimated_cost_usd: float = 0.0
 
 
 class ErrorResponse(BaseModel):
