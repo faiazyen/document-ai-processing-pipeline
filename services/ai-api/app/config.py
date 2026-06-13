@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4.1-mini"
     openai_input_usd_per_1m_tokens: float = 0.0
     openai_output_usd_per_1m_tokens: float = 0.0
-    database_url: str = "sqlite:///./invoices.db"
+    database_url: str = "sqlite:////tmp/invoices.db"
     cors_allow_origin_regex: str = r"^https://.*\.vercel\.app$"
     app_version: str = "1.0.0"
     app_name: str = "Document AI Processing Pipeline"

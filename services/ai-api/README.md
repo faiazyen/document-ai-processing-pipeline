@@ -57,7 +57,7 @@ All 32 tests should pass. Tests cover validation logic, fallback extraction, per
 | OPENAI_MODEL | gpt-4.1-mini | OpenAI model name |
 | OPENAI_INPUT_USD_PER_1M_TOKENS | 0 | Optional input-token price for estimated cost/request |
 | OPENAI_OUTPUT_USD_PER_1M_TOKENS | 0 | Optional output-token price for estimated cost/request |
-| DATABASE_URL | sqlite:///./invoices.db | SQLAlchemy connection string |
+| DATABASE_URL | sqlite:////tmp/invoices.db | SQLAlchemy connection string. Use `sqlite:///./invoices.db` for a local project-file database. |
 | CORS_ALLOW_ORIGIN_REGEX | `^https://.*\.vercel\.app$` | Optional Vercel preview origin regex |
 | PLATFORM_DEV_API_KEY | (empty) | Optional local API key seeded for the default tenant |
 | API_KEY_HASH_SECRET | local-development-secret | HMAC secret for API key hashes |
