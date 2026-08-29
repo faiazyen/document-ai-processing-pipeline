@@ -321,12 +321,21 @@ def get_invoice_by_id(invoice_id: int, tenant_id: str | None = None) -> InvoiceR
         return query.first()
 
 
-def get_all_invoices(tenant_id: str | None = None) -> list[InvoiceRecord]:
+def get_all_invoices(
+    tenant_id: str | None = None,
+    limit: int | None = None,
+    offset: int = 0,
+) -> list[InvoiceRecord]:
     with Session(engine) as session:
         query = session.query(InvoiceRecord)
         if tenant_id is not None:
             query = query.filter(InvoiceRecord.tenant_id == tenant_id)
-        return query.order_by(InvoiceRecord.id.desc()).all()
+        query = query.order_by(InvoiceRecord.id.desc())
+        if offset:
+            query = query.offset(offset)
+        if limit is not None:
+            query = query.limit(limit)
+        return query.all()
 
 
 def record_to_summary(record: InvoiceRecord) -> InvoiceSummary:

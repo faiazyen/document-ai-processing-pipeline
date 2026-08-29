@@ -29,7 +29,10 @@ def extract_invoice_with_openai(text: str) -> InvoiceExtraction:
     if not settings.openai_api_key:
         raise ValueError("OPENAI_API_KEY is not configured.")
 
-    client = OpenAI(api_key=settings.openai_api_key)
+    client = OpenAI(
+        api_key=settings.openai_api_key,
+        base_url=settings.openai_base_url or None,
+    )
     response = client.chat.completions.create(
         model=settings.openai_model,
         messages=[

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from typing import Optional
-from fastapi import APIRouter, BackgroundTasks, Depends, UploadFile, File, Header, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, UploadFile, File, Header, HTTPException, Query
 
 from app.config import settings
 from app.schemas import (
@@ -186,9 +186,14 @@ def get_current_tenant_usage(tenant: TenantRecord = Depends(get_tenant_from_api_
     "/invoices",
     response_model=list[InvoiceSummary],
     summary="List processed invoices",
+    description="Newest first. Use limit and offset to page through results.",
 )
-def list_invoices(tenant: TenantRecord = Depends(get_tenant_from_api_key)):
-    records = get_all_invoices(tenant_id=tenant.id)
+def list_invoices(
+    tenant: TenantRecord = Depends(get_tenant_from_api_key),
+    limit: int = Query(default=50, ge=1, le=200, description="Maximum results to return"),
+    offset: int = Query(default=0, ge=0, description="Results to skip, for pagination"),
+):
+    records = get_all_invoices(tenant_id=tenant.id, limit=limit, offset=offset)
     return [record_to_summary(r) for r in records]
 
 

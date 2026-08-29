@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     openai_api_key: str = ""
+    openai_base_url: str = ""
     openai_model: str = "gpt-4.1-mini"
     openai_input_usd_per_1m_tokens: float = 0.0
     openai_output_usd_per_1m_tokens: float = 0.0

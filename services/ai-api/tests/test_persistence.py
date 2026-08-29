@@ -51,6 +51,19 @@ def test_list_invoices_returns_all():
     assert len(records) == 2
 
 
+def test_list_invoices_respects_limit_and_offset():
+    for n in range(1, 6):
+        persistence.save_invoice(
+            f"inv-{n}.pdf", _sample_extraction(invoice_number=f"INV-00{n}"), ""
+        )
+    limited = persistence.get_all_invoices(limit=2)
+    assert len(limited) == 2
+    # Newest first: the last saved invoice leads the list
+    assert limited[0].invoice_number == "INV-005"
+    paged = persistence.get_all_invoices(limit=2, offset=2)
+    assert [r.invoice_number for r in paged] == ["INV-003", "INV-002"]
+
+
 def test_get_nonexistent_invoice_returns_none():
     result = persistence.get_invoice_by_id(99999)
     assert result is None
